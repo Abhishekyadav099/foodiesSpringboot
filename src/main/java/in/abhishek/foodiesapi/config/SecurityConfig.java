@@ -2,6 +2,9 @@ package in.abhishek.foodiesapi.config;
 
 import in.abhishek.foodiesapi.filters.JwtAuthenticationFilter;
 import in.abhishek.foodiesapi.service.AppUserDetailsService;
+import org.springframework.core.env.Environment;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +34,7 @@ public class SecurityConfig {
 
     private final AppUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final Environment env;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
@@ -56,9 +60,19 @@ public class SecurityConfig {
 
     private UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174"));
+        String allowed = env.getProperty("CORS_ALLOWED_ORIGINS");
+        if (allowed != null && !allowed.isBlank()) {
+            java.util.List<String> origins = Arrays.stream(allowed.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+            config.setAllowedOrigins(origins);
+        } else {
+            // Default: allow any origin pattern (useful for preview environments).
+            config.setAllowedOriginPatterns(List.of("*"));
+        }
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "*"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
