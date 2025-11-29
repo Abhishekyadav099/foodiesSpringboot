@@ -30,9 +30,9 @@ COPY --from=builder /build/target/*.jar app.jar
 # Expose port (default Spring Boot port)
 EXPOSE 8080
 
-# Health check
+# Health check (use runtime $PORT so container healthcheck matches the app port)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
+  CMD ["sh","-c","curl -f http://localhost:$PORT/actuator/health || exit 1"]
 
 # Set environment variables (can be overridden at runtime)
 ENV PORT=8080
