@@ -1,3 +1,13 @@
+target
+.git
+.idea
+.vscode
+*.log
+*.tmp
+node_modules
+dist
+build
+*.md
 # Git
 .git
 .gitignore
